@@ -1,0 +1,58 @@
+# Wildberries API error codes.
+#
+# Entries are validated against ErrorEntry (code, http_status, operation_id,
+# title, cause, fix). operation_id is optional — entries without it apply to
+# any method that returns the same code.
+#
+# Well-known codes extracted from the official specs (2026-08):
+#   - 07e4668e-ac2242c5c8c5-[UK-4dx7JUdskGZ] — 429 rate limit (all specs
+#     reference the SAME UUID, so it is a stable, searchable marker).
+#   - BadLimit / BadOffsetFormat / BadLimitFormat — 400 parameter validation.
+- code: 07e4668e-ac2242c5c8c5-[UK-4dx7JUdskGZ]
+  http_status: 429
+  title: too many requests
+  cause: "Превышен лимит запросов на аккаунт продавца. Короткая ошибка содержит detail='limited by c122a060-a7fb-4bb4-abb0-32fd4e18d489'."
+  fix: "Дождитесь окончания интервала лимита (следуйте Retry-After, если передан) и повторите. Один запрос с кодом 4XX считается как 10 запросов к лимиту — избегайте повторных 400."
+  related_methods: []
+
+- code: BadLimit
+  http_status: 400
+  title: Превышено допустимое значение параметра limit
+  cause: "Значение параметра limit больше максимально допустимого (например, для отчётов лимит ≤ 50)."
+  fix: "Уменьшите limit. Проверьте атрибут maximum в описании метода или используйте wb_describe_method."
+  related_methods: []
+
+- code: BadOffsetFormat
+  http_status: 400
+  title: Неверный формат offset
+  cause: "Значение параметра offset некорректно (не целое число или вне диапазона). origin: supply-api."
+  fix: "Передавайте offset как целое положительное число."
+  related_methods: []
+
+- code: BadLimitFormat
+  http_status: 400
+  title: Неверный формат limit
+  cause: "Значение параметра limit некорректно (не целое число или меньше 1). origin: supply-api."
+  fix: "Передавайте limit как целое число в диапазоне [1, maximum]. Минимум 1."
+  related_methods: []
+
+- code: InvalidToken
+  http_status: 401
+  title: Unauthorized
+  cause: "Заголовок Authorization отсутствует, пуст или передан неверный токен."
+  fix: "Проверьте WB_API_KEY. Токен берётся из настроек продавца в личном кабинете Wildberries (раздел API-ключи)."
+  related_methods: []
+
+- code: Forbidden
+  http_status: 403
+  title: Forbidden
+  cause: "Токен валиден, но не имеет прав (x-user-permissions) на категорию метода / домен."
+  fix: "Выдайте токену нужные права в личном кабинете WB, либо используйте метод из доступной категории."
+  related_methods: []
+
+- code: NotFound
+  http_status: 404
+  title: Not found
+  cause: "Запрашиваемый ресурс не существует (неверный id, отчёт ещё не сформирован, метод не подключён)."
+  fix: "Проверьте идентификаторы и период. Если метод требует предварительного формирования отчёта — сначала вызовите создающий метод."
+  related_methods: []

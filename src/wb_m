@@ -1,0 +1,46 @@
+"""Sandbox host mapping for Wildberries API.
+
+Wildberries provides a separate sandbox for each token category. The catalog
+records each method's production ``base_url`` (e.g.
+``https://content-api.wildberries.ru``); when the server runs in sandbox mode
+(``WB_SANDBOX=1``) we swap the production host for the matching sandbox host
+before making the call.
+
+Mapping is based on the official sandbox documentation
+(https://dev.wildberries.ru/en/sandbox):
+  - content-api            -> content-api-sandbox
+  - discounts-prices-api   -> discounts-prices-api-sandbox
+  - marketplace-api        -> marketplace-api-sandbox
+  - supplies-api           -> supplies-api-sandbox
+  - advert-api             -> advert-api-sandbox
+  - feedbacks-api          -> feedbacks-api-sandbox
+  - statistics-api         -> statistics-api-sandbox
+"""
+
+from __future__ import annotations
+
+from urllib.parse import urlparse
+
+SANDBOX_HOSTS: dict[str, str] = {
+    "content-api.wildberries.ru": "content-api-sandbox.wildberries.ru",
+    "discounts-prices-api.wildberries.ru": "discounts-prices-api-sandbox.wildberries.ru",
+    "marketplace-api.wildberries.ru": "marketplace-api-sandbox.wildberries.ru",
+    "supplies-api.wildberries.ru": "supplies-api-sandbox.wildberries.ru",
+    "advert-api.wildberries.ru": "advert-api-sandbox.wildberries.ru",
+    "feedbacks-api.wildberries.ru": "feedbacks-api-sandbox.wildberries.ru",
+    "statistics-api.wildberries.ru": "statistics-api-sandbox.wildberries.ru",
+}
+
+
+def sandbox_url(base_url: str) -> str:
+    """Return the sandbox URL for a production base URL.
+
+    If the host is not in the mapping, the original URL is returned
+    unchanged so the call still goes to the production host.
+    """
+    parsed = urlparse(base_url)
+    host = parsed.hostname or ""
+    sandbox_host = SANDBOX_HOSTS.get(host)
+    if sandbox_host is None:
+        return base_url
+    return parsed._replace(netloc=sandbox_host).geturl()

@@ -1,0 +1,31 @@
+# Curated safety overrides for Wildberries methods.
+#
+# Overrides the heuristic classification for methods where the path/operationId
+# wording is ambiguous. Validated against SafetyOverride.
+- operation_id: patch_api_v3_orders_orderId_cancel
+  safety: destructive
+  reason: "Отмена заказа до его сборки — необратимое действие (заказ нельзя восстановить)."
+
+- operation_id: delete_api_v3_supplies_supplyId
+  safety: destructive
+  reason: "Удаление поставки (в статусе 'В работе') — необратимо, заказы из поставки будут возвращены."
+
+- operation_id: delete_api_v3_stocks_warehouseId
+  safety: destructive
+  reason: "Удаление остатков по всем размерам товара — стирает данные остатков."
+
+- operation_id: post_content_v2_cards_delete_trash
+  safety: destructive
+  reason: "Полное удаление карточки из корзины — необратимо, товар пропадёт из каталога."
+
+- operation_id: post_content_v2_cards_recover
+  safety: write
+  reason: "Восстановление карточек из корзины меняет состояние каталога, но не удаляет данные."
+
+- operation_id: post_api_v3_orders_stickers
+  safety: write
+  reason: "Формирует штрихкоды для заказов (создаёт PDF), но не меняет данные заказа."
+
+- operation_id: get_api_feedbacks_v1_pins_limits
+  safety: read
+  reason: "Только информация о лимите закрепления отзывов — безопасный GET."

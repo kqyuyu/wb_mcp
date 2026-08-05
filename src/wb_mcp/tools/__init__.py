@@ -1,0 +1,1 @@
+"""MCP tools for Wildberries: discovery, reference, workflow, graph, execution."""

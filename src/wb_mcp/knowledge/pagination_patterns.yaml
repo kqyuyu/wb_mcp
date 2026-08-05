@@ -1,0 +1,207 @@
+# Wildberries pagination patterns.
+#
+# WB uses two pagination styles:
+#   1. next-cursor (GET /api/v3/orders, supplies, feedbacks pins, ...):
+#      pass `next`=0 for the first page, then echo the `next` value returned
+#      in the response body.
+#   2. limit/offset (classic): `limit` = page size, `offset` = skip count.
+#
+# Each entry is a flat list item validated against PaginationPattern.
+- operation_id: get_api_v3_orders
+  type: cursor
+  request_offset_field: next
+  request_limit_field: limit
+  response_items_field: orders
+  response_total_field: next
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v3_supplies
+  type: cursor
+  request_offset_field: next
+  request_limit_field: limit
+  response_items_field: supplies
+  response_total_field: next
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v3_dbw_orders
+  type: cursor
+  request_offset_field: next
+  request_limit_field: limit
+  response_items_field: orders
+  response_total_field: next
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v3_dbs_orders
+  type: cursor
+  request_offset_field: next
+  request_limit_field: limit
+  response_items_field: orders
+  response_total_field: next
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v3_click_collect_orders
+  type: cursor
+  request_offset_field: next
+  request_limit_field: limit
+  response_items_field: orders
+  response_total_field: next
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_marketplace_v3_fbs_orders_archive
+  type: cursor
+  request_offset_field: next
+  request_limit_field: limit
+  response_items_field: orders
+  response_total_field: next
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_feedbacks_v1_pins
+  type: cursor
+  request_offset_field: next
+  request_limit_field: limit
+  response_items_field: pins
+  response_total_field: next
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v1_users
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v2_list_goods_filter
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v2_list_goods_size_nm
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v2_quarantine_goods
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v2_history_goods_task
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v2_buffer_goods_task
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v1_supplies_ID_goods
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_adv_v1_adverts
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v1_calendar_promotions
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v1_calendar_promotions_nomenclatures
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v1_claims
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: getMeasurementPenalties
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: getWarehouseMeasurements
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: getDeductions
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v5_supplier_reportDetailByPeriod
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_api_v1_documents_list
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000
+
+- operation_id: get_content_v2_object_all
+  type: offset_limit
+  request_offset_field: offset
+  request_limit_field: limit
+  response_items_field: result
+  default_limit: 1000
+  max_limit: 1000

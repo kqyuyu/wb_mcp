@@ -1,0 +1,81 @@
+# Wildberries API quirks — non-obvious behaviour documentation.
+#
+# Validated against Quirk (operation_id or section + title + description).
+- operation_id: get_api_v3_orders
+  title: "next=0 начинает новую пагинацию"
+  description: >
+    Параметр `next` реализует курсорную пагинацию. Первый запрос
+    выполняется с `next=0`, а в ответе приходит поле `next`, которое нужно
+    передавать в следующий запрос без изменений. Если `next` в ответе равен
+    0 — страниц больше нет.
+  severity: info
+  extracted_from: curated
+  when_to_use:
+    - "Вытягивание всех новых заказов по дате"
+  common_mistakes:
+    - "Использовать `next` как номер страницы (page number)"
+
+- operation_id: get_api_v3_orders
+  title: "dateFrom обязателен, dateTo опционален"
+  description: >
+    Методы списков заказов требуют `dateFrom` (ISO-дата или дата-время).
+    `dateTo` можно не указывать — тогда вернутся все заказы после `dateFrom`.
+    Формат дат строго ISO 8601.
+  severity: warning
+  extracted_from: curated
+  when_to_use:
+    - "Инкрементальная синхронизация заказов"
+
+- operation_id: get_api_v2_list_goods_filter
+  title: "Недоступные артикулы в карантине"
+  description: >
+    Метод возвращает только товары, доступные продавцу. Товары в карантине
+    или с ошибками модерации возвращаются отдельными методами
+    (quarantine/goods). `filterNmID` поддерживает фильтр по артикулу.
+  severity: info
+  extracted_from: curated
+  when_to_use:
+    - "Получение перечня товаров"
+
+- operation_id: post_content_v2_get_cards_list
+  title: "max 100 карточек на запрос"
+  description: >
+    GET/POST списки карточек (`get/cards/list`) принимают `limit` максимум
+    100. Для массовой выгрузки используйте фоновые задания
+    `/content/v2/cards/upload` + опрос статуса по `uploadID`.
+  severity: warning
+  extracted_from: curated
+  when_to_use:
+    - "Массовая выгрузка карточек"
+  common_mistakes:
+    - "Передавать limit > 100"
+
+- section: "Аналитика продавца CSV"
+  title: "Отчёты с pre-generated файлом"
+  description: >
+    Методы отчётов (например, `/api/v5/supplier/reportDetailByPeriod`)
+    возвращают ссылку на CSV, а не сам файл. Сначала нужно дождаться
+    формирования отчёта, запросив его с периодом, затем получить по ссылке.
+    `limit` для таких методов ограничен (в документации ≤ 50).
+  severity: info
+  extracted_from: curated
+  when_to_use:
+    - "Выгрузка аналитических отчётов"
+
+- operation_id: post_content_v2_get_cards_trash
+  title: "Только удалённые карточки"
+  description: >
+    Метод возвращает только карточки, находящиеся в корзине (удалённые).
+    Активные карточки этот метод не отдаёт; для их списка используйте
+    `get/cards/list`.
+  severity: info
+  extracted_from: curated
+
+- section: "Возвраты покупателями"
+  title: "Методы отмечены readonly в спеках"
+  description: >
+    Часть методов перечисляет в пути `returns/buyer` только информацию о
+    возвратах. Никаких действий по управлению возвратами эти методы не
+    выполняют.
+  severity: info
+  extracted_from: curated

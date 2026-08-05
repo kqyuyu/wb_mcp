@@ -1,0 +1,55 @@
+# Wildberries API curated examples.
+#
+# Each entry is a realistic request/response pair. Validated against
+# MethodExample.
+- operation_id: post_content_v2_get_cards_list
+  title: "Получить карточки по артикулам продавца"
+  description: >
+    Поиск карточек с фильтром по vendorCode (артикул продавца). Принимает
+    до 100 карточек на запрос.
+  request:
+    settings:
+      cursor:
+        limit: 100
+    filter:
+      vendorCode: ["article-001", "article-002"]
+  response_excerpt:
+    cards:
+      - nmID: 163456789
+        vendorCode: "article-001"
+        subjectName: "Футболка"
+        updatedAt: "2026-07-01T10:00:00Z"
+
+- operation_id: get_api_v3_orders
+  title: "Первая страница заказов (next=0)"
+  description: >
+    Список заказов с 2026-08-01. `next` в ответе нужно передавать в
+    следующий запрос.
+  request:
+    dateFrom: "2026-08-01T00:00:00Z"
+    next: 0
+    limit: 100
+  response_excerpt:
+    orders:
+      - id: 20511312
+        sku: 163456789
+        warehouseName: "Коледино"
+        status: "new"
+    next: 20511313
+
+- operation_id: get_api_v2_list_goods_filter
+  title: "Список товаров продавца"
+  description: >
+    Перечень товаров с их остатками и ценами. `filterNmID` — фильтр по
+    артикулу, `limit`+`offset` — пагинация.
+  request:
+    limit: 100
+    offset: 0
+    filterNmID: 163456789
+  response_excerpt:
+    listGoods:
+      - nmID: 163456789
+        vendorCode: "article-001"
+        currencyIsoCode4217: "RUB"
+        discount: 10
+        price: 990

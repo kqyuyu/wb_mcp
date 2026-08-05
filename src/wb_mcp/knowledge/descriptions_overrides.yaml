@@ -1,0 +1,37 @@
+# Curated description overrides for Wildberries methods.
+#
+# Replaces / enriches the swagger description where the official text is too
+# terse or HTML-heavy. Validated against DescriptionOverride.
+- operation_id: get_api_v3_orders
+  description: >
+    Список заказов с фильтрацией по дате. Пагинация курсорная: первый запрос
+    с `next=0`, затем передавайте значение `next` из ответа. `dateFrom`
+    обязателен (ISO 8601), `dateTo` опционален. Один запрос с ответом 4XX
+    считается как 10 запросов к лимиту.
+
+- operation_id: get_api_v3_orders_new
+  description: >
+    Получить новые заказы (со статусом "new"), которых нет в архиве.
+    Пагинация курсорная через параметр `next`. Обязательный параметр
+    `dateFrom` — начальная дата создания заказа.
+
+- operation_id: post_content_v2_get_cards_list
+  description: >
+    Получить список карточек товаров по фильтру (vendorCode, objectID, tagID)
+    с курсорной пагинацией (settings.cursor.limit, максимум 100). Возвращает
+    карточки с их текущим статусом и данными. Для массовой обработки
+    используйте /content/v2/cards/upload.
+
+- operation_id: post_content_v2_cards_upload
+  description: >
+    Массовая загрузка карточек товаров (до 1000 карточек за задание).
+    Создаёт фоновое задание: в ответе возвращается uploadID. Статус
+    обработки отслеживается через /content/v2/cards/upload
+    (statistics.status). Готовая загрузка фиксируется методом
+    /content/v2/cards/upload (activate).
+
+- operation_id: get_api_v2_list_goods_filter
+  description: >
+    Список товаров продавца с фильтрацией по артикулу (filterNmID) и
+    пагинацией limit/offset. NRM включает остатки, цены, скидки и
+    валюту. Товары в карантине этим методом не возвращаются.

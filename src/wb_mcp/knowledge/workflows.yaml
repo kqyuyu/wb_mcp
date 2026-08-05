@@ -1,0 +1,140 @@
+# Wildberries curated workflows.
+#
+# Each workflow is a linear chain of API calls with per-step purpose and
+# optional pagination/batching notes. Validated against Workflow model.
+- name: sync_orders_fbs
+  title: "Синхронизация новых заказов FBS"
+  description: >
+    Инкрементальная синхронизация заказов по схеме FBS: сначала забираем
+    заказы «новые» (с датой создания после последней синхронизации), затем
+    обновляем их статусы по мере сборки и передачи в поставку.
+  category: orders
+  recommended_schedule: "каждые 5–15 минут"
+  review_status: draft
+  rate_limit_note: "Методы /api/v3/orders используют курсорную пагинацию next."
+  interpret: >
+    get_api_v3_orders_new возвращает новые заказы; после обработки каждый
+    заказ переводится в статус «confirm» (сборка) и «deliver» (передан в
+    поставку) методами post_api_v3_orders_status, затем заказ добавляется в
+    поставку через post_api_v3_supplies.
+  steps:
+    - n: 1
+      operation_id: get_api_v3_orders_new
+      purpose: "Забрать новые заказы (с датой создания после dateFrom)"
+      pagination: "next-курсор: next=0 сначала, далее из ответа"
+    - n: 2
+      operation_id: get_api_v3_orders
+      purpose: "Получить актуальные данные заказов (статусы, адреса, состав)"
+      pagination: "next-курсор"
+    - n: 3
+      operation_id: post_api_v3_orders_status
+      purpose: "Подтвердить заказы на сборку (статус confirm)"
+    - n: 4
+      operation_id: post_api_v3_supplies
+      purpose: "Добавить заказы в поставку для передачи на склад WB"
+  gotchas:
+    - "dateFrom обязателен; dateTo опционален (возвращаются все заказы после dateFrom)."
+    - "Один запрос с 4XX ответом считается как 10 запросов к лимиту."
+  common_mistakes:
+    - "Передавать next как номер страницы вместо курсора из ответа."
+
+- name: create_content_cards
+  title: "Создание карточек товаров"
+  description: >
+    Массовое создание карточек товаров через фоновое задание: загрузка
+    данных (upload/upload/add), ожидание обработки и получение результата
+    (get/cards/list), фиксируя возможные ошибки валидации
+    (cards/error/list).
+  category: content
+  recommended_schedule: "по потребности"
+  review_status: draft
+  rate_limit_note: "Лимит для методов карточек: max 100 позиций на запрос списка."
+  interpret: >
+    Сначала вызывается post_content_v2_cards_upload (до 1000 карточек за
+    загрузку) или post_content_v2_cards_upload_add для добавления к
+    существующей загрузке; после завершения задания получить созданные
+    карточки можно через post_content_v2_get_cards_list с filter
+    (vendorCode/objectID/tagID) либо проверить ошибки через
+    post_content_v2_cards_error_list.
+  steps:
+    - n: 1
+      operation_id: post_content_v2_cards_upload
+      purpose: "Загрузить карточки (до 1000) на создание"
+      concurrency: "серийно, 1 задание за раз"
+    - n: 2
+      operation_id: post_content_v2_get_cards_list
+      purpose: "Получить созданные карточки по фильтру vendorCode"
+      pagination: "limit/offset, limit max 100"
+    - n: 3
+      operation_id: post_content_v2_cards_error_list
+      purpose: "Проверить карточки с ошибками валидации"
+  gotchas:
+    - "uploadID из ответа upload нужен для опроса статуса задания."
+    - "Список get/cards/list отдаёт не более 100 карточек за запрос."
+  common_mistakes:
+    - "Передавать limit>100 в get/cards/list."
+    - "Считать, что upload синхронен — на самом деле это фоновое задание."
+
+- name: sync_sales_finance
+  title: "Сверка продаж и финансов"
+  description: >
+    Ежедневная сверка продаж и поступлений: выгрузка отчёта о продажах по
+    реализации и отчёта о выкупах, сверка по артикулам.
+  category: finance
+  recommended_schedule: "ежедневно (после формирования отчётов WB)"
+  review_status: draft
+  interpret: >
+    get_api_v1_supplier_sales возвращает данные по продажам (реализации),
+    get_api_v1_supplier_orders — по заказам; для полной финансовой выгрузки
+    дополнительно используется get_api_v5_supplier_reportDetailByPeriod
+    (отчёт с поставками, продажами, возвратами за период).
+  steps:
+    - n: 1
+      operation_id: get_api_v1_supplier_orders
+      purpose: "Скачать отчёт о заказах за период"
+    - n: 2
+      operation_id: get_api_v1_supplier_sales
+      purpose: "Скачать отчёт о продажах/реализации за период"
+    - n: 3
+      operation_id: get_api_v5_supplier_reportDetailByPeriod
+      purpose: "Получить детальный отчёт по периоду (поставки+продажи+возвраты)"
+      pagination: "limit/offset, limit ≤ 50"
+  gotchas:
+    - "Первая продажа/заказ в отчёте имеет dateFrom='1900-01-01' — не трактовать как данные."
+    - "Отчёт по реализации возвращает ссылку на CSV-файл, а не массив."
+  common_mistakes:
+    - "Запрашивать отчёт без ожидания его формирования (task_id)."
+
+- name: moderate_feedbacks_questions
+  title: "Модерация отзывов и вопросов"
+  description: >
+    Обработка вопросов покупателей и управление отзывами: получение новых
+    вопросов/отзывов, ответы на них, работа с «Закреплёнными отзывами» (pins).
+  category: content
+  recommended_schedule: "по потребности (несколько раз в день)"
+  review_status: draft
+  interpret: >
+    get_api_v1_questions возвращает вопросы, patch_api_v1_questions меняет
+    статус/ответ. get_api_v1_feedbacks — отзывы, post_api_v1_feedbacks_answer
+    публикует ответ продавца. get_api_feedbacks_v1_pins управляет
+    закреплением отзывов (доступно до 5 закреплённых отзывов).
+  steps:
+    - n: 1
+      operation_id: get_api_v1_questions
+      purpose: "Получить новые вопросы покупателей"
+      pagination: "limit/offset (isAnswered=false для новых)"
+    - n: 2
+      operation_id: patch_api_v1_questions
+      purpose: "Ответить на вопросы / изменить статус"
+    - n: 3
+      operation_id: get_api_feedbacks_v1_pins
+      purpose: "Получить закреплённые отзывы и лимиты закрепления"
+      pagination: "next-курсор"
+    - n: 4
+      operation_id: post_api_feedbacks_v1_pins
+      purpose: "Закрепить отзыв (если лимит не исчерпан)"
+  gotchas:
+    - "Максимум 5 закреплённых отзывов; лимит виден в get_api_feedbacks_v1_pins_limits."
+    - "Вопросы/отзывы с ответом не попадают в выборку isAnswered=false."
+  common_mistakes:
+    - "Пытаться закрепить больше отзывов, чем позволяет лимит."

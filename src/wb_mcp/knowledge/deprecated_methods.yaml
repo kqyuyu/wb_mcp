@@ -1,0 +1,16 @@
+# Deprecated / removed Wildberries methods (tombstones).
+#
+# These operation_ids used to ship in older versions of the spec but have
+# been removed or renamed. Kept so clients get a clean "deprecated" signal
+# instead of "method not found". Validated against DeprecatedMethod.
+- operation_id: get_api_v1_tariffs
+  path: /api/v1/tariffs
+  http_method: GET
+  replacement: get_api_v1_tariffs_commission
+  note: "Общий метод тарифов разделён на комиссию, короб, паллет и возврат (get_api_v1_tariffs_commission / get_api_v1_tariffs_box / get_api_v1_tariffs_pallet / get_api_v1_tariffs_return)."
+
+- operation_id: get_api_v1_supplies
+  path: /api/v1/supplies
+  http_method: GET
+  replacement: get_api_v3_supplies
+  note: "Старый список поставок заменён на /api/v3/supplies с курсорной пагинацией next."

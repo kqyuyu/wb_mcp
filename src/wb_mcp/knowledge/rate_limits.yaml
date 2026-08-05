@@ -1,0 +1,23 @@
+# Wildberries rate limits (per seller account).
+#
+# WB does not expose numeric per-section limits in the OpenAPI specs; each
+# method description links to the "Лимиты запросов" article which changes
+# over time. We therefore record the documented special cases and encode
+# conservative defaults in the transport layer (RateLimitRegistry).
+#
+# Special cases documented in the specs as of 2026-08:
+#   - GET /api/v1/content/groups/wc (createCategories) — 3 req / 30 sec
+#   - Category "Календарь акций" (calendar promotions) — 1 req / 10 min
+#   - ФБ Сборка сборочных заданий — максимум 1 запрос в 10 минут
+- operation_id: get_api_v1_content_groups_wc
+  api: wb
+  per_minute: 6
+  burst: 3
+  note: "Документация: максимум 3 запроса за 30 секунд. Лимит действует отдельно для каждого варианта метода в зависимости от домена."
+  source: docs
+
+- section: "Календарь акций"
+  api: wb
+  per_minute: 1
+  note: "Документация: максимум 1 запрос в 10 минут на один аккаунт продавца (эффективно 0.1 запроса/мин)."
+  source: docs
